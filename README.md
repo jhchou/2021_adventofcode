@@ -1,1 +1,3 @@
 # 2021_adventofcode
+
+A complete novice learning Julia...
