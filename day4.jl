@@ -5,8 +5,8 @@ end
 
 println("==================================================")
 
-file = "data/day4_test.txt" # ::IOStream
-# file = "data/day4.txt" # 
+# file = "data/day4_test.txt" # ::IOStream
+file = "data/day4.txt" # 
 
 lines = readlines(file)
 
@@ -14,7 +14,7 @@ draws = parse.(Int, split(lines[1], ','))
 println("Draw numbers: ", draws)
 
 numboards = (length(lines) - 2) ÷ 6 # integer division
-println("Number of boards: ", numboards)
+# println("Number of boards: ", numboards)
 
 allboards = Board[]
 for n = 1:numboards # for row in 6n-3 : 6n+1 # each row of the n'th board
@@ -29,20 +29,27 @@ for n = 1:numboards # for row in 6n-3 : 6n+1 # each row of the n'th board
 end
 
 
-println(a.filled)
-println(a.numbers)
+bingo = function(allboards, draws)
+    numboards = length(allboards)
+    for draw in draws
+        for n = 1:numboards
+            if haskey(allboards[n].numbers, draw)
+                (row, col) = allboards[n].numbers[draw]
+                allboards[n].filled[row, col] = true
+                b = allboards[n]
+                if any(sum(b.filled, dims = 1) .== 5) || any(sum(b.filled, dims = 2) .== 5)
+                    total = 0
+                    for num in keys(b.numbers)
+                        (r, c) = b.numbers[num] # should enumerate
+                        if !b.filled[r, c]
+                            total += num
+                        end
+                    end
+                    return((n, draw, total, total*draw))
+                end
+            end
+        end
+    end
+end
 
-# f = open(file) #
-# while !eof(f)
-#     line = readline(f)
-#     if isempty(line) # separator, so new board
-#         println("New board")
-#         println(board)
-#         println(typeof(board))
-#         # board = []
-#     else
-#         nextline = parse.(Int, split(line))
-#         push!(board, nextline)
-#     end
-# end
-# close(f)
+println("Board ", bingo(allboards, draws), " wins")
