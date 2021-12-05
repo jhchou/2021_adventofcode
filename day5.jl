@@ -4,12 +4,9 @@
 #  (2, 1)
 #  (3, 1)
 
-parselines = function(file)
-
-    nodiagonals = false
-
+parselines = function(file; nodiagonals = true)
     board = Dict{Tuple{Int, Int}, Int}()
-    lines = readlines(file)
+    lines = eachline(file)
     for line in lines
         m = match(r"(\d+),(\d+) -> (\d+),(\d+)", line)
         m === nothing && continue
@@ -22,21 +19,13 @@ parselines = function(file)
         end
         xrange = dx == 0 ? fill(x1, len) : x1:dx:x2 # not type stable...
         yrange = dy == 0 ? fill(y1, len) : y1:dy:y2 # not type stable...
-        points = zip(xrange, yrange)
-        for (x,y) in points
-            if haskey(board, (x, y))
-                board[(x, y)] += 1
-            else
-                board[(x, y)] = 1
-            end
+        for (x,y) in zip(xrange, yrange)
+            haskey(board, (x, y)) ? board[(x, y)] += 1 : board[(x, y)] = 1
         end
     end
-
-    return(board)
+    return( count(.>(1), values(board)) ) # number of values in dictionary > 1
 end
 
 # file = "data/day5_test.txt" # part 1 = 5; part 2 = 12
-file = "data/day5.txt"        # part 1 = 6710; part 2 = 
-
-x = parselines(file)
-count(.>(1), values(x))
+file = "data/day5.txt" # part 1 = 6710; part 2 = 20121
+parselines(file, nodiagonals = false)
