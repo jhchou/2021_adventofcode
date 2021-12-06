@@ -1,10 +1,10 @@
+# file = "data/day4_test.txt" # part 1 = 4512; part 2 = 1924
+file = "data/day4.txt" # part 1 = 69579; part 2 = 14877
+
 struct Board
     filled::Matrix{Bool} # zeros(Bool, 5, 5)
     numbers::Dict{Int, Tuple{Int, Int}} # number --> (row, col) position
 end
-
-# file = "data/day4_test.txt" # part 1 = 4512; part 2 = 1924
-file = "data/day4.txt" # part 1 = 69579; part 2 = 14877
 
 lines = readlines(file)
 
