@@ -1,5 +1,3 @@
-# Look into: using OffsetArrays; OffsetVector(zeros(Int, 9), 0:8)
-
 # file = "data/day6_test.txt" # 3,4,3,1,2; part 1 = 5934; part 2 = 26984457539
 file = "data/day6.txt" # part 1 = 362666; part 2 = 1640526601595
 
@@ -20,3 +18,11 @@ end
 
 println(fish(80, file))  # Part 1
 println(fish(256, file)) # Part 2
+
+
+# Look into:
+using OffsetArrays
+x = OffsetVector(zeros(Int, 9), 0:8)
+x[0] = 1
+x
+
