@@ -1,5 +1,5 @@
-file = "data/day8_test.txt" # part 1 = 37; part 2 = 168
-# file = "data/day8.txt" # part 1 = 352331; part 2 = 99266250
+# file = "data/day8_test.txt" # part 1 = ; part 2 = 61229
+file = "data/day8.txt" # part 1 = ; part 2 = 
 
 # unique segments: 1 -> 2; 4 -> 4; 7 -> 3; 8 -> 7
 function part1(file)
@@ -91,14 +91,13 @@ function parse_line(line)
     return(int_to_str, str_to_int, parse(Int, join(x)))
 end
 
-line = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
+function part_2(file)
+    lines = readlines(file)
+    total = 0
+    for line in lines
+        total += parse_line(line)[3]
+    end
+    return(total)
+end
 
-parse_line(line)
-
-# lines = readlines(file)
-# for line in lines
-    
-# end
-
-x = [string(str_to_int[output]) for output in (outputs |> split .|> collect .|> sort .|> join)]
-parse(Int, join(x))
+part_2(file)

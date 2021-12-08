@@ -3,12 +3,12 @@ fuelcost = function(positions, x, staticcost = true)
     if staticcost # Part 1
         return (dist |> sum) # part 1
     else # Part 2
-        return ((dist .* (dist .+ 1 ) .÷ 2) |> sum) # part 2
+        return ((dist .* (dist .+ 1 ) .÷ 2) |> sum) # part 2: n(n+1) / 2
     end
 end
 
 # if cost function might not have a SINGLE local minimum, test over entire dataset:
-#   minimum([fuelcost(positions, i) for i in minimum(positions):maximum(positions)])
+minimum([fuelcost(positions, i) for i in minimum(positions):maximum(positions)])
 
 
 lowestcost = function(file; staticcost = true)
