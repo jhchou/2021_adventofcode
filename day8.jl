@@ -18,10 +18,11 @@ part1(file)
 function part2(file)
     lines = readlines(file)
     for line in lines
+        line = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
         str_to_int = Dict{String, Int}()
         int_to_str = Dict{Int64, String}()
         m = match(r"(.*) \| (.*)", line)
-        m === nothing && continue
+        # m === nothing && continue
         signals = m.captures[1]
         output = m.captures[2]
         signal = split(signals)
@@ -43,11 +44,11 @@ function part2(file)
             end
         end
 
-        # 5 segment that has '1' Set(int_to_str[1]) is a 2
+        # 5 segment that has '1' Set(int_to_str[1]) is a 3
         for (idx, val) in enumerate(signal)
             if length(val) == 5 && (Set(int_to_str[1]) ⊆ Set(signal[idx]))
-                str_to_int[signal[idx]] = 2
-                int_to_str[2] = signal[idx]
+                str_to_int[signal[idx]] = 3
+                int_to_str[3] = signal[idx]
             end
         end
 
@@ -59,6 +60,31 @@ function part2(file)
             end
         end
 
+        # UNIDENTIFIED 6 segment that does NOT has 3 is 9, otherwise 0
+        for (idx, val) in enumerate(signal)
+            if length(val) == 6 && !haskey(str_to_int, val)
+                if Set(int_to_str[3]) ⊆ Set(signal[idx])
+                    str_to_int[signal[idx]] = 9
+                    int_to_str[9] = signal[idx]
+                else
+                    str_to_int[signal[idx]] = 0
+                    int_to_str[0] = signal[idx]
+                end
+            end
+        end
+
+        # UNIDENTIFIED 5 segment that is a subset of 6 is a 5, otherwise 2
+        for (idx, val) in enumerate(signal)
+            if length(val) == 5 && !haskey(str_to_int, val)
+                if Set(signal[idx]) ⊆ Set(int_to_str[6])
+                    str_to_int[signal[idx]] = 5
+                    int_to_str[5] = signal[idx]
+                else
+                    str_to_int[signal[idx]] = 2
+                    int_to_str[2] = signal[idx]
+                end
+            end
+        end
         
     end
     
