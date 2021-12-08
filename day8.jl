@@ -20,34 +20,34 @@ println("Part 1 $(part1(file))")
 ##########################################################################################
 
 function parseline(line)
-    strtoint = Dict{String, Int}()
-    inttostr = Dict{Int, String}()
-    
+    # Use set of signals as keys, because order is not constant
+    settoint = Dict{Set{Char}, Int}()
+    inttoset = Dict{Int, Set{Char}}()
 
     m = match(r"(.*) \| (.*)", line)
-    signal = m.captures[1] |> split .|> collect .|> sort .|> join
+    signal = m.captures[1] |> split .|> Set
     outputs = m.captures[2]
     
     # identify unique length segments
     uniquelength = Dict(2 => 1, 4 => 4, 3 => 7, 7 => 8)
     for (idx, len) in enumerate(length.(signal))
         if haskey(uniquelength, len)
-            strtoint[signal[idx]] = uniquelength[len]
-            inttostr[uniquelength[len]] = signal[idx]
+            settoint[signal[idx]] = uniquelength[len]
+            inttoset[uniquelength[len]] = signal[idx]
         end
     end
 
     # identify 3 and 6
-    # - 5 segment that has '1' Set(inttostr[1]) is a 3
+    # - 5 segment that has '1' Set(inttoset[1]) is a 3
     # - 6 segment that does NOT have '1' is 6
     for (idx, len) in enumerate(length.(signal))
-        if len == 5 && (Set(inttostr[1]) ⊆ Set(signal[idx]))
-            strtoint[signal[idx]] = 3
-            inttostr[3] = signal[idx]
+        if len == 5 && (Set(inttoset[1]) ⊆ Set(signal[idx]))
+            settoint[signal[idx]] = 3
+            inttoset[3] = signal[idx]
         end
-        if len == 6 && !(Set(inttostr[1]) ⊆ Set(signal[idx]))
-            strtoint[signal[idx]] = 6
-            inttostr[6] = signal[idx]
+        if len == 6 && !(Set(inttoset[1]) ⊆ Set(signal[idx]))
+            settoint[signal[idx]] = 6
+            inttoset[6] = signal[idx]
         end
     end
 
@@ -55,32 +55,30 @@ function parseline(line)
     # - unidentified 6 segment that does NOT contain 3 is 9, otherwise 0
     # - unidentified 5 segment that is a subset of 6 is a 5, otherwise 2
     for (idx, val) in enumerate(signal)
-        if length(val) == 6 && !haskey(strtoint, val) # not already identified
-            if Set(inttostr[3]) ⊆ Set(val)
-                strtoint[val] = 9
-                inttostr[9] = val
+        if length(val) == 6 && !haskey(settoint, val) # not already identified
+            if Set(inttoset[3]) ⊆ Set(val)
+                settoint[val] = 9
+                inttoset[9] = val
             else
-                strtoint[signal[idx]] = 0
-                inttostr[0] = val
+                settoint[signal[idx]] = 0
+                inttoset[0] = val
             end
         end
-        if length(val) == 5 && !haskey(strtoint, val) # not already identified
-            if Set(signal[idx]) ⊆ Set(inttostr[6])
-                strtoint[val] = 5
-                inttostr[5] = val
+        if length(val) == 5 && !haskey(settoint, val) # not already identified
+            if Set(signal[idx]) ⊆ Set(inttoset[6])
+                settoint[val] = 5
+                inttoset[5] = val
             else
-                strtoint[val] = 2
-                inttostr[2] = val
+                settoint[val] = 2
+                inttoset[2] = val
             end
         end
     end
 
     # Parse output into Integer value
-    # - need to split signals, sort characters, and rejoin
-    # - will refactor to using Sets as keys later
-    outputvalue = parse(Int, join([string(strtoint[output]) for output in (outputs |> split .|> collect .|> sort .|> join)]))
+    outputvalue = parse(Int, join([string(settoint[output]) for output in (outputs |> split .|> Set)]))
     
-    return(strtoint, strtoint, outputvalue)
+    return(settoint, settoint, outputvalue)
 end
 
 function part2(file)
