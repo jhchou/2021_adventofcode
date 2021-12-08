@@ -1,103 +1,145 @@
-# file = "data/day8_test.txt" # part 1 = ; part 2 = 61229
-file = "data/day8.txt" # part 1 = ; part 2 = 
+# file = "data/day8_test.txt" # part 1 = 26; part 2 = 61229
+file = "data/day8.txt" # part 1 = 247; part 2 = 933305
 
-# unique segments: 1 -> 2; 4 -> 4; 7 -> 3; 8 -> 7
 function part1(file)
-    lines = readlines(file)
+    # count the number of digits which are identifiable by a unique number of segments
+    # e.g., the digitis 1, 4, 7, and 8 uniquely have 2, 4, 3, and 7 segments respectively
+    lines = eachline(file)
     total = 0
     for line in lines
         m = match(r"\|(.*)$", line)
         m === nothing && continue
+        # split by whitespace into words, find lengths, Boolean for if length is 2,4,3,7, sum
         total += sum(m.captures[1] |> split .|> length .|> x -> x in [2,4,3,7])
     end 
     return(total)
 end
-part1(file)
 
+println("Part 1 $(part1(file))")
 
-function parse_line(line)
-    str_to_int = Dict{String, Int}()
-    int_to_str = Dict{Int, String}()
+##########################################################################################
+
+function parseline(line)
+    strtoint = Dict{String, Int}()
+    inttostr = Dict{Int, String}()
+    
+
     m = match(r"(.*) \| (.*)", line)
-    # m === nothing && continue
-    signals = m.captures[1]
+    signal = m.captures[1] |> split .|> collect .|> sort .|> join
     outputs = m.captures[2]
     
-    # signal = split(signals)
-    signal = signals |> split .|> collect .|> sort .|> join
-
-    # unique length segments: 1 -> 2; 4 -> 4; 7 -> 3; 8 -> 7
-    for (idx, val) in enumerate(signal)
-        if length(signal[idx]) == 2
-            str_to_int[signal[idx]] = 1
-            int_to_str[1] = signal[idx]
-        elseif length(signal[idx]) == 4
-            str_to_int[signal[idx]] = 4
-            int_to_str[4] = signal[idx]
-        elseif length(signal[idx]) == 3
-            str_to_int[signal[idx]] = 7
-            int_to_str[7] = signal[idx]
-        elseif length(signal[idx]) == 7
-            str_to_int[signal[idx]] = 8
-            int_to_str[8] = signal[idx]
+    # identify unique length segments
+    uniquelength = Dict(2 => 1, 4 => 4, 3 => 7, 7 => 8)
+    for (idx, len) in enumerate(length.(signal))
+        if haskey(uniquelength, len)
+            strtoint[signal[idx]] = uniquelength[len]
+            inttostr[uniquelength[len]] = signal[idx]
         end
     end
 
-    # 5 segment that has '1' Set(int_to_str[1]) is a 3
-    for (idx, val) in enumerate(signal)
-        if length(val) == 5 && (Set(int_to_str[1]) ⊆ Set(signal[idx]))
-            str_to_int[signal[idx]] = 3
-            int_to_str[3] = signal[idx]
+    # identify 3 and 6
+    # - 5 segment that has '1' Set(inttostr[1]) is a 3
+    # - 6 segment that does NOT have '1' is 6
+    for (idx, len) in enumerate(length.(signal))
+        if len == 5 && (Set(inttostr[1]) ⊆ Set(signal[idx]))
+            strtoint[signal[idx]] = 3
+            inttostr[3] = signal[idx]
+        end
+        if len == 6 && !(Set(inttostr[1]) ⊆ Set(signal[idx]))
+            strtoint[signal[idx]] = 6
+            inttostr[6] = signal[idx]
         end
     end
 
-    # 6 segment that does NOT have '1' is 6
+    # identify 9 and 0; identify 5 and 2
+    # - unidentified 6 segment that does NOT contain 3 is 9, otherwise 0
+    # - unidentified 5 segment that is a subset of 6 is a 5, otherwise 2
     for (idx, val) in enumerate(signal)
-        if length(val) == 6 && !(Set(int_to_str[1]) ⊆ Set(signal[idx]))
-            str_to_int[signal[idx]] = 6
-            int_to_str[6] = signal[idx]
-        end
-    end
-
-    # UNIDENTIFIED 6 segment that does NOT has 3 is 9, otherwise 0
-    for (idx, val) in enumerate(signal)
-        if length(val) == 6 && !haskey(str_to_int, val)
-            if Set(int_to_str[3]) ⊆ Set(signal[idx])
-                str_to_int[signal[idx]] = 9
-                int_to_str[9] = signal[idx]
+        if length(val) == 6 && !haskey(strtoint, val) # not already identified
+            if Set(inttostr[3]) ⊆ Set(val)
+                strtoint[val] = 9
+                inttostr[9] = val
             else
-                str_to_int[signal[idx]] = 0
-                int_to_str[0] = signal[idx]
+                strtoint[signal[idx]] = 0
+                inttostr[0] = val
+            end
+        end
+        if length(val) == 5 && !haskey(strtoint, val) # not already identified
+            if Set(signal[idx]) ⊆ Set(inttostr[6])
+                strtoint[val] = 5
+                inttostr[5] = val
+            else
+                strtoint[val] = 2
+                inttostr[2] = val
             end
         end
     end
 
-    # UNIDENTIFIED 5 segment that is a subset of 6 is a 5, otherwise 2
-    for (idx, val) in enumerate(signal)
-        if length(val) == 5 && !haskey(str_to_int, val)
-            if Set(signal[idx]) ⊆ Set(int_to_str[6])
-                str_to_int[signal[idx]] = 5
-                int_to_str[5] = signal[idx]
-            else
-                str_to_int[signal[idx]] = 2
-                int_to_str[2] = signal[idx]
-            end
-        end
-    end
-
-    # Parse outputs
-    x = [string(str_to_int[output]) for output in (outputs |> split .|> collect .|> sort .|> join)]
+    # Parse output into Integer value
+    # - need to split signals, sort characters, and rejoin
+    # - will refactor to using Sets as keys later
+    outputvalue = parse(Int, join([string(strtoint[output]) for output in (outputs |> split .|> collect .|> sort .|> join)]))
     
-    return(int_to_str, str_to_int, parse(Int, join(x)))
+    return(strtoint, strtoint, outputvalue)
 end
 
-function part_2(file)
-    lines = readlines(file)
+function part2(file)
+    lines = eachline(file)
     total = 0
     for line in lines
-        total += parse_line(line)[3]
+        total += parseline(line)[3]
     end
     return(total)
 end
 
-part_2(file)
+println("Part 2 $(part2(file))")
+
+
+##########################################################################################
+#
+# Digit assignment logic
+#
+# (unique number of segments)
+# num segments
+# 1   2
+# 4   4
+# 7   3
+# 8   7
+
+# ('1' is a subset of these remaining 5 segments)
+# 2 : -1
+# 3 : +1
+# 5 : -1
+
+# ('1' is a subset of these remaining 6 segments)
+# 0 : +1
+# 6 : -1 ***
+# 9 : +1
+
+
+# ('9' is a subset of these remaining 6 segments)
+# 0 : 3 is NOT a subset of 0
+# 9 : 3 is a subset of 9
+
+
+# (Of the remaninging 5 segments...)
+# 2 : NOT a subset of 6
+# 5 : IS a subset of 6
+
+#   0:      1:      2:      3:      4:
+#  aaaa    ....    aaaa    aaaa    ....
+# b    c  .    c  .    c  .    c  b    c
+# b    c  .    c  .    c  .    c  b    c
+#  ....    ....    dddd    dddd    dddd
+# e    f  .    f  e    .  .    f  .    f
+# e    f  .    f  e    .  .    f  .    f
+#  gggg    ....    gggg    gggg    ....
+
+#   5:      6:      7:      8:      9:
+#  aaaa    aaaa    aaaa    aaaa    aaaa
+# b    .  b    .  .    c  b    c  b    c
+# b    .  b    .  .    c  b    c  b    c
+#  dddd    dddd    ....    dddd    dddd
+# .    f  e    f  .    f  e    f  .    f
+# .    f  e    f  .    f  e    f  .    f
+#  gggg    gggg    ....    gggg    gggg
