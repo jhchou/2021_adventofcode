@@ -141,3 +141,49 @@ println("Part 2 $(part2(file))")
 # .    f  e    f  .    f  e    f  .    f
 # .    f  e    f  .    f  e    f  .    f
 #  gggg    gggg    ....    gggg    gggg
+
+
+
+
+# Others use segment frequency distributions to identify digits
+
+# Nicer set-based solution
+# - https://julialang.zulipchat.com/#narrow/stream/307139-advent-of-code-.282021.29/topic/day.208/near/264156687
+
+# function decoder(uniques)
+#     to_int = Dict{Set{Char}, Int}()
+#     from_int = Dict{Int, Set{Char}}()
+#     lengths = length.(uniques)
+
+#     # takes only strings with length len, converts them to sets and filters by filt
+#     strX(len, filt) = only(filter(filt, Set.(uniques[lengths .== len])))
+
+#     function push_strX!(value, len, filt)
+#         push!(to_int, strX(len, filt) => value)
+#         push!(from_int, value => strX(len, filt))
+#     end
+#     push_strX!(value, len) = push_strX!(value, len, s->true)
+
+#     push_strX!(1, 2)
+#     push_strX!(4, 4)
+#     push_strX!(7, 3)
+#     push_strX!(8, 7)
+#     push_strX!(6, 6, s -> from_int[1] ⊈ s)
+#     push_strX!(9, 6, s -> from_int[4] ⊆ s)
+#     push_strX!(3, 5, s -> from_int[1] ⊆ s)
+#     push_strX!(5, 5, s -> s ⊆ from_int[6])
+#     push_strX!(2, 5, s -> s ⊈ from_int[9])
+#     push_strX!(0, 6, s -> from_int[5] ⊈ s)
+
+#     to_int
+# end
+
+# function part_2(input)
+#     sum = 0
+#     for line in input
+#         uniques, digits = split.(split(line, "|"))
+#         dec = decoder(uniques)
+#         sum += parse(Int, join([ dec[x] for x in Set.(digits)]))
+#     end
+#     sum
+# end
