@@ -6,16 +6,13 @@ takestep! = function(grid)
         anyflashed = false
         toflash = findall(grid .> 9) # all coordinates where > 9
         for crd in toflash
-            if !(crd in flashed) # if not already flashed, increment adjacent by 1
+            if !(crd in flashed) # new flash found; add to list; increment adjacent cells
                 anyflashed = true
                 push!(flashed, crd)
-                # Really ugly -- increment adjacent cells by 1, after testing within grid bounds
-                for (xoffset,yoffset) in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+                for xoffset in -1:1, yoffset in -1:1
                     x = crd[1] + xoffset
                     y = crd[2] + yoffset
-                    if !(x < 1 || x > xmax || y < 1 || y > ymax) # if within grid
-                        grid[x, y] += 1
-                    end
+                    ((xoffset, yoffset) != (0, 0)) && checkbounds(Bool, grid, x, y) && (grid[x, y] += 1)
                 end
             end
         end
