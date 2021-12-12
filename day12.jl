@@ -21,27 +21,20 @@ pathsearch = function(newnode::String, visited::Array{String}, maxvisits = 1) # 
     push!(visited, newnode)
     if newnode == "end"
         # println(join(visited, ','))
-        return true
-    end
-
-    nextnodes = String[]
-    for node in values(nodes[newnode])
-        # can visit any ONE smallnode up to maxvisits times; but can also visit all other small nodes up to once
-        smalls = [n for n in [visited; node] if n in smallnodes] # after adding node to visited, vector of smallnodes
-        countsmalls = [count(==(i), smalls) for i in unique(smalls)] # number of each unique smallnode
-        nummaxvisits = count(>=(maxvisits), countsmalls) # 
-        
-        if !(node in smallnodes) || ((nummaxvisits < 2) && (maximum(countsmalls) <= maxvisits))
-            push!(nextnodes, node)
-        end
-    end
-    if length(nextnodes) == 0
-        return false
+        pop!(visited)
+        return 1
     end
     total = 0
-    for nextnode in nextnodes
-        total += pathsearch(nextnode, copy(visited), maxvisits)
+    for nextnode in values(nodes[newnode])
+        # can visit any ONE smallnode up to maxvisits times; but can also visit all other small nodes up to once
+        smalls = [n for n in [visited; nextnode] if n in smallnodes] # vector of smallnodes visited thus far, including nextnode being tested
+        countsmalls = [count(==(i), smalls) for i in unique(smalls)] # number of each unique smallnode
+        nummaxvisits = count(>=(maxvisits), countsmalls) # 
+        if !(nextnode in smallnodes) || ((nummaxvisits < 2) && (maximum(countsmalls) <= maxvisits))
+            total += pathsearch(nextnode, visited, maxvisits)
+        end
     end
+    pop!(visited)
     return total
 end
 
