@@ -1,6 +1,5 @@
 readnodes = function(file)
     nodes = Dict{String, Array{String}}()
-    small = Array{String}
     for line in eachline(file)
         m = match(r"(.*)-(.*)", line)
         m === nothing && continue
@@ -13,7 +12,7 @@ readnodes = function(file)
             haskey(nodes, n2) ? push!(nodes[n2], n1) : nodes[n2] = [n1] # n2 --> n1
         end
     end
-    smallnodes = [node for node in keys(nodes) if all(char -> char in 'a':'z', collect(node))]
+    smallnodes = [node for node in keys(nodes) if all(islowercase, collect(node))]
     return (nodes, smallnodes)
 end
 
@@ -32,7 +31,6 @@ pathsearch = function(newnode::String, visited::Array{String}, maxvisits = 1) # 
         countsmalls = [count(==(i), smalls) for i in unique(smalls)] # number of each unique smallnode
         nummaxvisits = count(>=(maxvisits), countsmalls) # 
         
-        
         if !(node in smallnodes) || ((nummaxvisits < 2) && (maximum(countsmalls) <= maxvisits))
             push!(nextnodes, node)
         end
@@ -40,7 +38,6 @@ pathsearch = function(newnode::String, visited::Array{String}, maxvisits = 1) # 
     if length(nextnodes) == 0
         return false
     end
-    # println(nextnodes)
     total = 0
     for nextnode in nextnodes
         total += pathsearch(nextnode, copy(visited), maxvisits)
@@ -51,8 +48,8 @@ end
 
 # file = "data/day12_test.txt" # part 1 = 10; part 2 = 36
 # file = "data/day12_test2.txt" # part 1 = 19; part 2 = 103
-# file = "data/day12_test3.txt" # part 1 = 226; part 2 = 3509
-file = "data/day12.txt" # part 1 = 5157; part 2 = 144309; takes a few seconds to run...
+file = "data/day12_test3.txt" # part 1 = 226; part 2 = 3509
+# file = "data/day12.txt" # part 1 = 5157; part 2 = 144309; takes a few seconds to run...
 
 (nodes, smallnodes) = readnodes(file)
 pathsearch("start", String[], 2)
