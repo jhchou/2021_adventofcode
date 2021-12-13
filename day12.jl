@@ -45,7 +45,9 @@ day12 = function(file)
         return total
     end
     
-    return(pathsearch("start", String[], false), pathsearch("start", String[], true))
+    part1 = pathsearch("start", String[], false)
+    part2 = pathsearch("start", String[], true)
+    return (part1, part2)
 end
 
 # file = "data/day12_test.txt" # part 1 = 10; part 2 = 36
@@ -56,3 +58,8 @@ file = "data/day12.txt" # part 1 = 5157; part 2 = 144309; slightly noticable pau
 results = day12(file)
 println("Part 1: $(results[1])")
 println("Part 2: $(results[2])")
+
+
+using BenchmarkTools
+@benchmark day12(file)
+@btime day12(file)
