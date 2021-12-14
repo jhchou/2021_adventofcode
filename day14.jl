@@ -43,18 +43,19 @@ countelements = function(pairs)
     return elements
 end
 
-
 # file = "data/day14_test.txt" # part 1 = 1588; part 2 = 2188189693529
-file = "data/day14.txt" # part 1 = 2967; part 2 = 
+file = "data/day14.txt" # part 1 = 2967; part 2 = 3692219987038
 
-(pairs, expand) = parsedata(file)
-for i in 1:40
-    pairs = takestep(pairs, expand)
+day14 = function(file)
+    (pairs, expand) = parsedata(file)
+    for i in 1:40
+        pairs = takestep(pairs, expand)
+        if i in [10,40]
+            sum(values(pairs)) + 1 # number of letters = number of pairs + 1
+            c = countelements(pairs)
+            println("After $i steps: $(maximum(values(c)) - minimum(values(c)))")
+        end
+    end
 end
-pairs
-sum(values(pairs)) + 1 # number of letters = number of pairs + 1
-c = countelements(pairs)
-maximum(values(c)) - minimum(values(c))
-# results = day12(file)
-# println("Part 1: $(results[1])")
-# println("Part 2: $(results[2])")
+
+day14(file)
