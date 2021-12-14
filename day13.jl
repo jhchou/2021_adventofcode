@@ -38,7 +38,7 @@ end
 
 
 # file = "data/day13_test.txt" # part 1 = 17; part 2 = 
-file = "data/day13.txt" # part 1 = 802; part 2 = 
+file = "data/day13.txt" # part 1 = 802; part 2 = RKHFZGUB
 
 (d, folds) = parsedata(file)
 
