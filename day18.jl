@@ -1,4 +1,4 @@
-explode = function(num)
+explodeonce = function(num)
     nest_level = 0
     idx = 0
     idxstart = 0
@@ -6,7 +6,7 @@ explode = function(num)
     while true
         idx += 1
         if idx > length(num)
-            return (0, 0)
+            return (num) # nothing to explode
         end
         c = num[idx]
         if c == '['
@@ -46,10 +46,27 @@ explode = function(num)
     end
 end
 
-# Explode
+explode = function(num)
+    while true
+        num2 = explodeonce(num)
+        if num != num2
+            num = num2
+        else
+            break
+        end
+    end
+    return num
+end
+
+# Explode testing
 explode("[[[[[9,8],1],2],3],4]") == "[[[[0,9],2],3],4]"
 explode("[7,[6,[5,[4,[3,2]]]]]") == "[7,[6,[5,[7,0]]]]"
 explode("[[6,[5,[4,[3,2]]]],1]") == "[[6,[5,[7,0]]],3]"
 explode("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]") == "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]"
+explodeonce("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]") == "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]"
 explode("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]") == "[[3,[2,[8,0]]],[9,[5,[7,0]]]]"
 
+
+splitpair = function(num)
+
+end
