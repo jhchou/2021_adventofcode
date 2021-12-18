@@ -68,5 +68,15 @@ explode("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]") == "[[3,[2,[8,0]]],[9,[5,[7,0]]]]"
 
 
 splitpair = function(num)
-
+    m = match(r"(\d{2,})", num) # left-most 2 or more digits
+    if m === nothing
+        return num
+    end
+    idx = m.offset
+    n = parse(Int, m.captures[1])
+    pre = num[1:idx-1]
+    post = num[idx + length(m.captures[1]):end]
+    return pre * '[' * string(Int(floor(n/2))) * ',' * string(Int(ceil(n/2))) * ']' * post
 end
+
+
