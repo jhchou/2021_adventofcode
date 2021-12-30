@@ -84,9 +84,7 @@ end
 # file = "data/day22_test2.txt" # part 1 = 590784
 # file = "data/day22_test3.txt" # part 1 = ; part2 = 2758514936282235
 file = "data/day22.txt" # part 1 = 545118; part2 = 1227298136842375
-
 boxes = Set{Box}()
-
 for line in eachline(file)
     m = match(r"(on|off) x=(.+)\.\.(.+),y=(.+)\.\.(.+),z=(.+)\.\.(.+)", line)
     type = (m.captures[1] == "on")
@@ -94,12 +92,10 @@ for line in eachline(file)
     newbox = Box(num[1]:num[2], num[3]:num[4], num[5]:num[6])
     for oldbox in boxes
         if intersectbox(oldbox, newbox)
-            delete!(boxes, oldbox) # this seems VERY DANGEROUS, as it's modifying what we're interating over; but it works
+            delete!(boxes, oldbox) # seems VERY dangerous, modifying what we're interating over; but it works
             for (x,y,z) in Iterators.product(subintervals(oldbox.x, newbox.x), subintervals(oldbox.y, newbox.y), subintervals(oldbox.z, newbox.z))
-                if intersectbox(Box(x, y, z), newbox)
-                    # println("$x $y $z")
-                else
-                    push!(boxes, Box(x, y, z))
+                if !intersectbox(Box(x, y, z), newbox)
+                    push!(boxes, Box(x, y, z)) # also seems like a REALLY bad idea, but it works
                 end
             end
         end
