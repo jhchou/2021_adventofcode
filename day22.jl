@@ -1,3 +1,7 @@
+# file = "data/day22_test1.txt" # part 1 = 39; 
+# file = "data/day22_test2.txt" # part 1 = 590784
+file = "data/day22.txt" # part 1 = 545118
+
 limit = function(x, val)
     if abs(x) > val
         return val * sign(x)
@@ -5,10 +9,6 @@ limit = function(x, val)
         return x
     end
 end
-
-# file = "data/day22_test1.txt" # part 1 = 39; 
-# file = "data/day22_test2.txt" # part 1 = 590784
-file = "data/day22.txt" # part 1 = 545118
 
 reactor = Dict{Tuple{Int, Int, Int}, Bool}()
 for line in eachline(file)
@@ -45,60 +45,73 @@ intersectbox = function(old::Box, new::Box)
     return all(i -> length(i) != 0, [dx, dy, dz])
 end
 
-boxes = Set{Box}()
-line = readline(file)
+subintervals = function(old::UnitRange, new::UnitRange)
+    # vector of UnitRange intervals that are all possible subsets of the old range
+    # that CAN intersect the new range (because in multiple dimensions, overlap may not occur in other dims)
+    if length(old ∩ new) == 0 # no intersection, so return entire old
+        return [old]
+    end
+    oldmin = minimum(old)
+    oldmax = maximum(old)
+    newmin = minimum(new) <= oldmin ? oldmin : minimum(new) # bound to old range
+    newmax = maximum(new) >= oldmax ? oldmax : maximum(new) # bound to old range
 
-m = match(r"(on|off) x=(.+)\.\.(.+),y=(.+)\.\.(.+),z=(.+)\.\.(.+)", line)
-type = (m.captures[1] == "on")
-num = m.captures[2:7] .|> x -> parse(Int, x)
-x = num[1]:num[2]
-y = num[3]:num[4]
-z = num[5]:num[6]
+    intervals = UnitRange[]
+    if newmin > oldmin # Before new range
+        push!(intervals, oldmin:newmin-1)
+    end
+    push!(intervals, newmin:newmax) # New range
+    if newmax < oldmax # After new range
+        push!(intervals, newmax+1:oldmax)
+    end
+
+    return intervals
+end
+
+# subintervals(1:10, 3:4)
+# subintervals(1:10, 3:3)
+# subintervals(1:10, 2:9)
+# subintervals(5:6, 1:5)
+# subintervals(5:6, 6:10)
+# subintervals(5:6, 7:10)
+
+
+# oldbox = Box(1:10, 1:10, 1:10)
+# newbox = Box(5:5, 5:5, 5:5)
+
+
+# file = "data/day22_test1.txt" # part 1 = 39; 
+# file = "data/day22_test2.txt" # part 1 = 590784
+# file = "data/day22_test3.txt" # part 1 = ; part2 = 2758514936282235
+file = "data/day22.txt" # part 1 = 545118; part2 = 1227298136842375
+
+boxes = Set{Box}()
 
 for line in eachline(file)
     m = match(r"(on|off) x=(.+)\.\.(.+),y=(.+)\.\.(.+),z=(.+)\.\.(.+)", line)
     type = (m.captures[1] == "on")
     num = m.captures[2:7] .|> x -> parse(Int, x)
-    if num[5] > num[6]
-        println(line)
-    end
-end
-
-subintervals = function(old::UnitRange, new::UnitRange)
-    # vector of UnitRange intervals that are subsets of the old range, that do NOT intersect the new range
-    if length(old ∩ new) == 0 # no intersection, so return entire old
-        return old
-    end
-
-    newmin = minimum(new)
-    newmax = maximum(new)
-    
-    # bounds = vcat([minimum(old), maximum(old)], [newmin-1, newmin, newmin+1, newmax-1, newmax, newmax+1]) # include boundary points for REAMINING boxes from old
-    bounds = [newmin-1, newmin, newmin+1, newmax-1, newmax, newmax+1] # include boundary points for REAMINING boxes from old
-    bounds = [x for x in sort(unique(bounds)) if x ⊆ old]
-    bounds = vcat(minimum(old), bounds, maximum(old))
-    
-    interval = UnitRange[]
-    for i in 1:length(bounds)-1
-        rng = bounds[i]:bounds[i+1]
-        if length(intersect(rng, new)) == 0
-            push!(interval, bounds[i]:bounds[i+1])
+    newbox = Box(num[1]:num[2], num[3]:num[4], num[5]:num[6])
+    for oldbox in boxes
+        if intersectbox(oldbox, newbox)
+            delete!(boxes, oldbox) # this seems VERY DANGEROUS, as it's modifying what we're interating over; but it works
+            for (x,y,z) in Iterators.product(subintervals(oldbox.x, newbox.x), subintervals(oldbox.y, newbox.y), subintervals(oldbox.z, newbox.z))
+                if intersectbox(Box(x, y, z), newbox)
+                    # println("$x $y $z")
+                else
+                    push!(boxes, Box(x, y, z))
+                end
+            end
         end
     end
-    return unique(interval) # unique 
+    if type
+        push!(boxes, newbox)
+    end
 end
 
-subintervals(1:10, 3:3)
-subintervals(1:10, 2:9)
-subintervals(5:6, 6:10)
-subintervals(5:6, 7:10)
 
-# Following fails because subintervals doesn't take into account when in one dimension is within range, but out of range in other dims
 sum = 0
-for (x,y,z) in Iterators.product(subintervals(1:10, 5:5), subintervals(1:10, 5:5), subintervals(1:10, 5:5))
-    println("$x $y $z")
-    sum += length(x)*length(y)*length(z)
+for box in boxes
+    sum += length(box.x)*length(box.y)*length(box.z)
 end
 sum
-
-collect(Iterators.product(subintervals(1:10, 3:3), subintervals(1:10, 2:9), subintervals(1:10, 2:5)))
