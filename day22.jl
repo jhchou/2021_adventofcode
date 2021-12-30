@@ -93,7 +93,12 @@ subintervals(1:10, 2:9)
 subintervals(5:6, 6:10)
 subintervals(5:6, 7:10)
 
-collect(Iterators.product(subintervals(1:10, 5:5), subintervals(1:10, 5:5), subintervals(1:10, 5:5)))
-
+# Following fails because subintervals doesn't take into account when in one dimension is within range, but out of range in other dims
+sum = 0
+for (x,y,z) in Iterators.product(subintervals(1:10, 5:5), subintervals(1:10, 5:5), subintervals(1:10, 5:5))
+    println("$x $y $z")
+    sum += length(x)*length(y)*length(z)
+end
+sum
 
 collect(Iterators.product(subintervals(1:10, 3:3), subintervals(1:10, 2:9), subintervals(1:10, 2:5)))
