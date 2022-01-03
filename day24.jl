@@ -44,13 +44,38 @@ end
 
 file = "data/day24.txt"
 # for model in 99999999999999:-1:1
-for model in 99999999999999:-1:11111111111111
-    if model % 10000 == 0
-        println("... $model ...")
+# for model in 99999999999999:-1:11111111111111
+#     if model % 10000 == 0
+#         println("... $model ...")
+#     end
+#     if runalu(model, file)["z"] == 0
+#         println("Result: $model")
+#         break
+#     end
+# end
+
+digit = 0
+for line in eachline(file)
+    m = match(r"(...) (.)\s*(.*)", line)
+    cmd = m.captures[1]
+    reg = m.captures[2]
+    op = m.captures[3]
+
+    if cmd == "inp"
+        digit += 1
+        println("$line, digit $digit")
+        continue
     end
-    if runalu(model, file)["z"] == 0
-        println("Result: $model")
-        break
+    
+    if cmd == "add"
+        println("$reg += $op")
+    elseif cmd == "mul"
+        println("$reg *= $op")
+    elseif cmd == "div"
+        println("$reg ÷= $op")
+    elseif cmd == "mod"
+        println("$reg %= $op")
+    elseif cmd == "eql"
+        println("$reg == $op")
     end
 end
-
