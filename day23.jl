@@ -13,6 +13,19 @@ for idx in 1:19
     rc2idx[row, col] = idx
 end
 
+function printstate(state)
+    x = replace(state, "9" => ".", "0" => "A", "1" => "B", "2" => "C", "3" => "D")
+    # println(state)
+    # println()
+    println("#############")
+    println("#$(x[1:11])#")
+    println("###$(x[12])#$(x[13])#$(x[14])#$(x[15])###")
+    println("  #$(x[16])#$(x[17])#$(x[18])#$(x[19])#")
+    println("  #########")
+    println()
+    println()
+end
+
 
 using AStarSearch # https://github.com/PaoloSarti/AStarSearch.jl
 
@@ -121,7 +134,12 @@ function findneighbors(state)
         type = parse(Int, start)
         goalcol = 2*type + 3
         if row == 1 # in hallway, only allowed to goal
-            colsclear = all(==('9'), state[min(col, goalcol):max(col, goalcol)])
+            # following is WRONG -- it's blocking ITSELF
+            # colsclear = all(==('9'), state[min(col, goalcol):max(col, goalcol)])
+            idx1 = min(col, goalcol)
+            idx2 = max(col, goalcol)
+            colsclear = all(==('9'), [state[i] for i in idx1:idx2 if i != col])
+
             if !colsclear continue end # hallway not clear to goal
             if state[rc2idx[2, goalcol]] == '9' # top goal room clear
                 if state[rc2idx[3, goalcol]] == '9'
@@ -153,11 +171,13 @@ end
 # Input: "9999999999930223011"
 
 start     = "9999999999912130320"
-
 goalstate = "9999999999901230123"
+
 result = astar(findneighbors, start, goalstate, heuristic = h, cost = statecost)
+
 result.status
-result.path
 result.cost
 result.closedsetsize
 result.opensetsize
+
+printstate.(result.path)
