@@ -1,7 +1,13 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.0"
+julia_version = "1.7.1"
 manifest_format = "2.0"
+
+[[deps.AStarSearch]]
+deps = ["DataStructures"]
+git-tree-sha1 = "f47bdd58517893c5b5956a12bf97772b46e58171"
+uuid = "e6cbe913-2b79-4cc5-848a-e3bbf8537828"
+version = "0.5.2"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
