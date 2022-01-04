@@ -1,12 +1,5 @@
 using AStarSearch # https://github.com/PaoloSarti/AStarSearch.jl
 
-part2 = true # inserts 32103102 at rows 3 and 4
-
-# start = "9999999999912130320" # test, part 1 cost = 12521; part 2 cost = 44169
-start = "9999999999930223011" # input, cost = 19046; part 2 cost = 47484
-# start = "9999999999932012301" # jean
-
-
 # Rules
 # - Amber 1 energy per step; Bronze 10; Copper 100; Desert 1000
 # - will never stop on the space immediately outside any room (positions 3,5,7,9 in row 1)
@@ -31,15 +24,8 @@ start = "9999999999930223011" # input, cost = 19046; part 2 cost = 47484
 # - ?start room to hallway above start room: depends on input?
 # - hallway above destination to goal room: 3 * (1 + 10 + 100 + 1000) = 3333
 
-
-if part2
-    start = start[1:15] * "32103102" * start[16:19]
-end
-roomrows = (length(start) - 11) ÷ 4
-goalstate = "99999999999" * "0123"^roomrows # hallway 11x 9's, followed by roomrows repetitions of "0123"
-
-
 # Build conversion dictionaries between idx and (row, col)
+roomrows = 4
 idx2rc = Dict{Integer, Tuple{Int64, Int64}}()
 rc2idx = Dict{Tuple{Int64, Int64}, Integer}()
 for idx in 1:(11 + 4*roomrows)
@@ -127,6 +113,7 @@ function findneighbors(state, idx)
     (row, col) = idx2rc[idx]
     type = parse(Int, startchar)
     goalcol = 2*type + 3
+    roomrows = (length(state) - 11) ÷ 4
 
     if row == 1 # in hallway, only allowed to goal column room
         idx1 = min(col, goalcol)
@@ -173,20 +160,20 @@ end
 
 
 
-result = astar(findallneighbors, start, goalstate, heuristic = h, cost = statecost)
+part2 = true # inserts 32103102 at rows 3 and 4
+# start = "9999999999912130320" # test, part 1 cost = 12521; part 2 cost = 44169
+start = "9999999999930223011" # input, cost = 19046; part 2 cost = 47484
+# start = "9999999999932012301" # jean
 
-result.status
+if part2
+    start = start[1:15] * "32103102" * start[16:19]
+end
+roomrows = (length(start) - 11) ÷ 4
+goalstate = "99999999999" * "0123"^roomrows # hallway 11x 9's, followed by roomrows repetitions of "0123"
+
+result =  astar(findallneighbors, start, goalstate, heuristic = h, cost = statecost);
+# result.status
 # result.closedsetsize
 # result.opensetsize
-printstate.(result.path, showstring = false);
+# printstate.(result.path, showstring = false);
 result.cost
-
-
-# start = "9999999999912130320"
-# printstate(start, showstring = false)
-# printstate.(findneighbors(start, 15), showstring = true);
-
-
-
-# printstate("9999999999312190320")
-# printstate.(findneighbors("9999999999312190320", 19), showstring = true); # failing to move A
