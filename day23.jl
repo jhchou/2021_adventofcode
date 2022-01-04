@@ -1,9 +1,9 @@
 using AStarSearch # https://github.com/PaoloSarti/AStarSearch.jl
 
-part2 = false # inserts 32103102 at rows 3 and 4
+part2 = true # inserts 32103102 at rows 3 and 4
 
-start = "9999999999912130320" # test, part 1 cost = 12521; part 2 cost = 44169
-# start = "9999999999930223011" # input, cost = 19046; part 2 cost = ?
+# start = "9999999999912130320" # test, part 1 cost = 12521; part 2 cost = 44169
+start = "9999999999930223011" # input, cost = 19046; part 2 cost = 47484
 # start = "9999999999932012301" # jean
 
 
@@ -73,6 +73,8 @@ end
 
 "Heuristic function"
 function h(state, goal)
+    # optimistic minimum cost of movement, NOT taking into account blockages OR between rows
+    # - don't want to include row movement, because can conceivably start in correct position and never move
     cost = 0
     for amphi in '0':'3'
         type = parse(Int, amphi)
@@ -81,7 +83,7 @@ function h(state, goal)
         positions = findall(==(amphi), collect(state))
         for idx in positions
             (row, col) = idx2rc[idx]
-            cost += abs(goalcol - col) * movecost
+            cost += (abs(goalcol - col)) * movecost
         end
     end
     return cost
@@ -93,8 +95,9 @@ function statecost(state1, state2)
     # indices where two strings of same length differ: findall(==(true), collect(x) .!= collect(y))
     # assume valid move differing at only two swapped characters, one of which must be a '9'
     # assume row changes are always to or from hallway, not from room to room
+    # row calculation of cost DO NOT take into account moving up then down, so disallow
     indices = findall(==(true), collect(state1) .!= collect(state2))
-    if length(indices) == 0 return 0 end
+    if length(indices) == 0 return 0 end # in case receive the same state, there will be no differences
     (idx1, idx2) = indices[1], indices[2]
     if state1[idx1] == '9'
         (idx1, idx2) = (idx2, idx1) # idx1 will be the starting locations; idx2 -> '9'
@@ -102,7 +105,6 @@ function statecost(state1, state2)
     type = parse(Int, state1[idx1])
     (row1, col1) = idx2rc[idx1]
     (row2, col2) = idx2rc[idx2]
-    # row calculation of cost does NOT take into account moving up then down
     cost = 10^type * (abs(row2 - row1) + abs(col2 - col1))
     return cost
 end
@@ -116,41 +118,43 @@ function swapidx(state, idx1, idx2)
 end
 
 
-"Find all valid neighbor states"
-function findneighbors(state)
+"Find all valid neighbor states from one spot"
+function findneighbors(state, idx)
     # allow only start room to hallway, and hallway to destination room
     neighbors = String[]
-    for idx in 1:19
-        start = state[idx]
-        if start == '9' continue end
-        (row, col) = idx2rc[idx]
-        type = parse(Int, start)
-        goalcol = 2*type + 3
-        if row == 1 # in hallway, only allowed to goal
-            idx1 = min(col, goalcol)
-            idx2 = max(col, goalcol)
-            colsclear = all(==('9'), [state[i] for i in idx1:idx2 if i != col]) # so it doesn't block itself
+    startchar = state[idx]
+    if startchar == '9' return neighbors end # empty space, nothing to move
+    (row, col) = idx2rc[idx]
+    type = parse(Int, startchar)
+    goalcol = 2*type + 3
 
-            if !colsclear continue end # hallway not clear to goal
-            if state[rc2idx[2, goalcol]] == '9' # top goal room clear
-                if state[rc2idx[3, goalcol]] == '9'
-                    # bottom goal room clear, so allow move to bottom room
-                    push!(neighbors, swapidx(state, idx, rc2idx[3, goalcol]))
-                elseif state[rc2idx[3, goalcol]] == start
-                    # bottom goal room correct type, so allow move to top room
-                    push!(neighbors, swapidx(state, idx, rc2idx[2, goalcol]))
-                end
-            end
-        # the following is WRONG -- if starts in goal col but is blocking, needs to move out and then back in
-        else # if col != goalcol # not hallway and not goal, so in starting room
-            #   - row 2 or 3, and col 3,5,7,9
-            # can move from room to hallway 1,2,4,6,8,10,11
-            # can NOT move to hallway 3, 5, 7, 9
-            if row == 2 || state[rc2idx[2, col]] == '9' # clear to enter hallway
-                for destcol in [1,2,4,6,8,10,11]
-                    if all(==('9'), state[min(col, destcol):max(col, destcol)])
-                        push!(neighbors, swapidx(state, idx, rc2idx[1, destcol]))
-                    end
+    if row == 1 # in hallway, only allowed to goal column room
+        idx1 = min(col, goalcol)
+        idx2 = max(col, goalcol)
+        colsclear = all(==('9'), [state[i] for i in idx1:idx2 if i != col]) # so it doesn't block itself
+
+        if !colsclear return neighbors end # hallway not clear to goal
+
+        # Require: 2:(roomrows+1), goalcol are all either '9' or startchar (matching type)
+        if !all(c -> c in ['9', startchar], [state[rc2idx[r, goalcol]] for r in 2:(roomrows+1)])
+            return neighbors
+        end
+        # Allow movement into all goal column rooms
+        # - ?a bit inefficient, as allowing to move into "top" room, even when lower rooms are empty
+        for r in 2:(roomrows+1)
+            if state[rc2idx[r, goalcol]] != '9' break end
+            push!(neighbors, swapidx(state, idx, rc2idx[r, goalcol]))
+        end
+
+    
+    # NOT in hallway, in one of the rooms
+    # MUST allow starting in goal column AND moving out to hallway, in case blocking
+    else # row != 1, and col 3,5,7,9
+        # check to see if clear to enter hallway
+        if row == 2 || (all(==('9'), [state[rc2idx[i, col]] for i in 2:(row-1)]))
+            for destcol in [1, 2, 4, 6, 8, 10, 11] # permissible hallway columns
+                if all(==('9'), state[min(col, destcol):max(col, destcol)])
+                    push!(neighbors, swapidx(state, idx, rc2idx[1, destcol]))
                 end
             end
         end
@@ -159,11 +163,30 @@ function findneighbors(state)
 end
 
 
+function findallneighbors(state)
+    neighbors = String[]
+    for idx in 1:length(state)
+        neighbors = [neighbors; findneighbors(state, idx)]
+    end
+    return neighbors
+end
 
-result = astar(findneighbors, start, goalstate, heuristic = h, cost = statecost)
+
+
+result = astar(findallneighbors, start, goalstate, heuristic = h, cost = statecost)
 
 result.status
-result.closedsetsize
-result.opensetsize
+# result.closedsetsize
+# result.opensetsize
 printstate.(result.path, showstring = false);
 result.cost
+
+
+# start = "9999999999912130320"
+# printstate(start, showstring = false)
+# printstate.(findneighbors(start, 15), showstring = true);
+
+
+
+# printstate("9999999999312190320")
+# printstate.(findneighbors("9999999999312190320", 19), showstring = true); # failing to move A
