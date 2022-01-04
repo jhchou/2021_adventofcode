@@ -1,17 +1,32 @@
+start = "9999999999912130320" # test, part 1 cost = 12521; part 2 cost = 44169
+# start = "9999999999930223011" # input, cost = 19046
+# start = "9999999999932012301" # jean
+
+part2 = true # inserts 32103102 at rows 3 and 4
+if part2
+    start = start[1:15] * "32103102" * start[16:19]
+end
+
+roomrows = (length(start) - 11) ÷ 4
+
+
+
+
 # Build conversion dictionaries between idx and (row, col)
 idx2rc = Dict{Integer, Tuple{Int64, Int64}}()
 rc2idx = Dict{Tuple{Int64, Int64}, Integer}()
-for idx in 1:19
+for idx in 1:(11 + 4*roomrows)
     if idx <= 11
         (row, col) = (1, idx)
-    elseif idx <= 15
-        (row, col) = (2, 2*(idx-12) + 3)
     else
-        (row, col) = (3, 2*(idx-16) + 3)
+        row = (idx - 4) ÷ 4
+        col = 2*((idx - 12) % 4) + 3 # 3,5,7,9
     end
     idx2rc[idx] = (row, col)
     rc2idx[row, col] = idx
+    println("$idx $row $col")
 end
+
 
 function printstate(state; showstring=false)
     x = replace(state, "9" => ".", "0" => "A", "1" => "B", "2" => "C", "3" => "D")
@@ -167,10 +182,16 @@ function findneighbors(state)
 end
 
 
-# start = "9999999999912130320" # test, cost = 12521
-start = "9999999999930223011" # input, cost = 19046
+start = "9999999999912130320" # test, cost = 12521
+# start = "999999999991213321031020320" # test, part 2, cost = 44169; adds 32103102 at rows 3 and 4
+
+# start = "9999999999930223011" # input, cost = 19046
+# start = "999999999993022321031023011" # input, part 2, cost = 
+
+# start = "9999999999932012301" # jean
 
 goalstate = "9999999999901230123"
+# goalstate = "999999999990123012301230123" # for part 2
 
 
 result = astar(findneighbors, start, goalstate, heuristic = h, cost = statecost)
@@ -181,3 +202,5 @@ result.closedsetsize
 result.opensetsize
 
 printstate.(result.path, showstring = false)
+
+
