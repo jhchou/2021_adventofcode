@@ -13,10 +13,11 @@ for idx in 1:19
     rc2idx[row, col] = idx
 end
 
-function printstate(state)
+function printstate(state; showstring=false)
     x = replace(state, "9" => ".", "0" => "A", "1" => "B", "2" => "C", "3" => "D")
-    # println(state)
-    # println()
+    if showstring
+        println(state)
+    end
     println("#############")
     println("#$(x[1:11])#")
     println("###$(x[12])#$(x[13])#$(x[14])#$(x[15])###")
@@ -134,11 +135,9 @@ function findneighbors(state)
         type = parse(Int, start)
         goalcol = 2*type + 3
         if row == 1 # in hallway, only allowed to goal
-            # following is WRONG -- it's blocking ITSELF
-            # colsclear = all(==('9'), state[min(col, goalcol):max(col, goalcol)])
             idx1 = min(col, goalcol)
             idx2 = max(col, goalcol)
-            colsclear = all(==('9'), [state[i] for i in idx1:idx2 if i != col])
+            colsclear = all(==('9'), [state[i] for i in idx1:idx2 if i != col]) # so it doesn't block itself
 
             if !colsclear continue end # hallway not clear to goal
             if state[rc2idx[2, goalcol]] == '9' # top goal room clear
@@ -150,7 +149,8 @@ function findneighbors(state)
                     push!(neighbors, swapidx(state, idx, rc2idx[2, goalcol]))
                 end
             end
-        elseif col != goalcol # not hallway and not goal, so in starting room
+        # the following is WRONG -- if starts in goal col but is blocking, needs to move out and then back in
+        else # if col != goalcol # not hallway and not goal, so in starting room
             #   - row 2 or 3, and col 3,5,7,9
             # can move from room to hallway 1,2,4,6,8,10,11
             # can NOT move to hallway 3, 5, 7, 9
@@ -167,11 +167,11 @@ function findneighbors(state)
 end
 
 
-# Test:  "9999999999912130320"
-# Input: "9999999999930223011"
+# start = "9999999999912130320" # test, cost = 12521
+start = "9999999999930223011" # input, cost = 19046
 
-start     = "9999999999912130320"
 goalstate = "9999999999901230123"
+
 
 result = astar(findneighbors, start, goalstate, heuristic = h, cost = statecost)
 
@@ -180,4 +180,4 @@ result.cost
 result.closedsetsize
 result.opensetsize
 
-printstate.(result.path)
+printstate.(result.path, showstring = false)
