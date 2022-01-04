@@ -24,7 +24,24 @@ using AStarSearch # https://github.com/PaoloSarti/AStarSearch.jl
 # - ?start room to hallway above start room: depends on input?
 # - hallway above destination to goal room: 3 * (1 + 10 + 100 + 1000) = 3333
 
-function day23(input, part2::Bool)
+
+"Take state string and display graphic"
+function printstate(state; showstring=false)
+    roomrows = (length(state) - 11) ÷ 4
+    x = replace(state, "9" => ".", "0" => "A", "1" => "B", "2" => "C", "3" => "D")
+    if showstring println(state) end
+    println("#############")
+    println("#$(x[1:11])#")
+    println("###$(x[12])#$(x[13])#$(x[14])#$(x[15])###")
+    for i in 2:roomrows
+        println("  #$(x[i*4 + 8])#$(x[i*4 + 9])#$(x[i*4 + 10])#$(x[i*4 + 11])#")
+    end
+    println("  #########")
+    println()
+end
+
+
+function day23(input; part2=false)
     # part2 = true # inserts 32103102 at rows 3 and 4
     start = input
     if part2
@@ -47,21 +64,6 @@ function day23(input, part2::Bool)
         # println("$idx $row $col")
     end
 
-    "Take state string and display graphic"
-    function printstate(state; showstring=false)
-        roomrows = (length(state) - 11) ÷ 4
-        x = replace(state, "9" => ".", "0" => "A", "1" => "B", "2" => "C", "3" => "D")
-        if showstring println(state) end
-        println("#############")
-        println("#$(x[1:11])#")
-        println("###$(x[12])#$(x[13])#$(x[14])#$(x[15])###")
-        for i in 2:roomrows
-            println("  #$(x[i*4 + 8])#$(x[i*4 + 9])#$(x[i*4 + 10])#$(x[i*4 + 11])#")
-        end
-        println("  #########")
-        println()
-    end
-    
     
     "Heuristic function"
     function h(state, goal)
@@ -173,9 +175,12 @@ end
 input = "9999999999930223011" # input, cost = 19046; part 2 cost = 47484
 # input = "9999999999932012301" # jean
 
-result = day23(input, true);
+result = day23(input);
+println("Part 1: cost = $(result.cost)") # part 1
+
+result = day23(input, part2=true);
 # result.status
 # result.closedsetsize
 # result.opensetsize
 # printstate.(result.path, showstring = false);
-result.cost
+println("Part 2: cost = $(result.cost)") # part 2
