@@ -1,0 +1,267 @@
+# Goal: z == 0
+
+inp w, digit 1
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 13
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 14
+y *= x
+z += y
+
+inp w, digit 2
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 12
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 8
+y *= x
+z += y
+
+inp w, digit 3
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 11
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 5
+y *= x
+z += y
+
+inp w, digit 4
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += 0
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 4
+y *= x
+z += y
+
+inp w, digit 5
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 15
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 10
+y *= x
+z += y
+
+inp w, digit 6
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -13
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 13
+y *= x
+z += y
+
+inp w, digit 7
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 10
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 16
+y *= x
+z += y
+
+inp w, digit 8
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -9
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 5
+y *= x
+z += y
+
+inp w, digit 9
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 11
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 6
+y *= x
+z += y
+
+inp w, digit 10
+x *= 0
+x += z
+x %= 26
+z /= 1
+x += 13
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 13
+y *= x
+z += y
+
+inp w, digit 11
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -14
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 6
+y *= x
+z += y
+
+inp w, digit 12
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -3
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 7
+y *= x
+z += y
+
+inp w, digit 13
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -2
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 13
+y *= x
+z += y
+
+inp w, digit 14
+x *= 0
+x += z
+x %= 26
+z /= 26
+x += -14
+x == w
+x == 0
+y *= 0
+y += 25
+y *= x
+y += 1
+z *= y
+y *= 0
+y += w
+y += 3
+y *= x
+z += y
